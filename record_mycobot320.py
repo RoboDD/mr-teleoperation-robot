@@ -1,5 +1,4 @@
 #! /usr/bin/python
-
 import rospy
 from sensor_msgs.msg import Image, JointState
 from mycobot_communication.msg import MycobotCoords
@@ -11,13 +10,8 @@ import argparse
 import sys
 import numpy as np
 import math
-# from message_filters import ApproximateTimeSynchronizer, Subscriber
 
 global data_path
-# global experiment_path
-# global images_path_fpv
-# global images_path_tpv
-
 global WRITE_FLAG
 global RECORD_FREQUENCY
 global FREQUENCY_10HZ
@@ -46,28 +40,12 @@ def imgmsg_to_cv2(img_msg):
     image_opencv = image_opencv[:,:,[2,1,0]]
     return image_opencv
 
-def cv2_to_imgmsg(cv_image):
-    img_msg = Image()
-    img_msg.height = cv_image.shape[0]
-    img_msg.width = cv_image.shape[1]
-    img_msg.encoding = "bgr8"
-    img_msg.is_bigendian = 0
-    img_msg.data = cv_image.tostring()
-    img_msg.step = len(img_msg.data) // img_msg.height # That double line is actually integer division, not a comment
-    return img_msg
-
-# Instantiate CvBridge Not competiable with Python3 and ROS noetic!
-# bridge = CvBridge()
-
 def image_callback_fpv(msg):
+
     timestamp = math.floor(rospy.Time.now().to_sec())
     print("Received an fpv image!")
 
-    # Convert your ROS Image message to OpenCV2
     cv2_img = imgmsg_to_cv2(msg)
-
-    
-    # path = 'ziniu_data/John/VR_experiment/images/fpv/'
     filename = str(timestamp) + '_savedImage.jpg'
 
     if WRITE_FLAG == True:
@@ -79,24 +57,18 @@ def image_callback_fpv(msg):
 def image_callback_tpv(msg):
     
     timestamp = math.floor(rospy.Time.now().to_sec())
-
     print("Received an tpv image!")
 
-    # Convert your ROS Image message to OpenCV2
     cv2_img = imgmsg_to_cv2(msg)
-
-    # path = 'ziniu_data/John/VR_experiment/images/tpv/'
     filename = str(timestamp) + '_savedImage.jpg'
 
     if WRITE_FLAG == True:
         cv2.imwrite(str(images_path_tpv)+filename, cv2_img)
-    # cv2.waitKey(0)
     rospy.sleep(RECORD_FREQUENCY) # wait one second
 
 
 def joint_callback(msg):
     
-    # timestamp = math.floor(rospy.Time.now().to_sec())
     timestamp = rospy.Time.now().to_sec()
     print("Received an joint states!")
 
@@ -172,8 +144,6 @@ def run(participant_name, experiment_type, data_path):
     # Init ROS node
     rospy.init_node('data_recorder_node', anonymous=True)
 
-    # rate = rospy.Rate(10)
-
     # Define your image topic
     image_topic_fpv = "/camera/color/image_raw"
     image_topic_tpv = "/usb_cam/image_raw"
@@ -190,10 +160,6 @@ def run(participant_name, experiment_type, data_path):
     rospy.Subscriber(joint_topic, JointState, joint_callback) # 15hz
     rospy.Subscriber(real_pos_sub, MycobotCoords, pos_callback)
 
-    # while not rospy.is_shutdown():
-    #     # rospy.spinOnce()
-    #     # Set up your subscriber and define its callback
-    #     rate.sleep()
     # Spin until ctrl + c
     rospy.spin()
 

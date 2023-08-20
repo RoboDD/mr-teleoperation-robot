@@ -4,7 +4,7 @@
 """[summary]
 This file obtains the joint angle of the manipulator in ROS,
 and then sends it directly to the real manipulator using `pymycobot` API.
-This file is [slider_control.launch] related script.
+This file is adopted from [slider control in mycobot ROS].
 Passable parameters:
     port: serial prot string. Defaults is '/dev/ttyAMA0'
     baud: serial prot baudrate. Defaults is 1000000.
@@ -35,23 +35,19 @@ def callback(data):
     else:
         mc.set_gripper_state(0,50)
 
-    # time.sleep(0.5)
-
 
 def listener():
+    
     global mc
+
     rospy.init_node("control_slider", anonymous=True)
 
     rospy.Subscriber("joint_states", JointState, callback)
     
-
-
     port = rospy.get_param("~port", "/dev/ttyAMA0")
     baud = rospy.get_param("~baud", 115200)
     print(port, baud)
     mc = MyCobot(port, baud)
-
-
 
     # spin() simply keeps python from exiting until this node is stopped
     print("spin ...")
